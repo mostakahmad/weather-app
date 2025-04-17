@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>United Software Solutions - Weather App</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #74ebd5 0%, #9face6 100%);
+      color: #333;
+    }
+
+    header {
+      background-color: #2c3e50;
+      padding: 1rem 2rem;
+      text-align: center;
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .weather-container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 320px;
+      margin: 50px auto;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+      color: #2c3e50;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #3498db;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    #weatherResult {
+      margin-top: 20px;
+    }
+
+    .weather-icon {
+      width: 64px;
+      height: 64px;
+    }
+
+    .weather-info {
+      margin-top: 15px;
+      font-size: 16px;
+      text-align: left;
+    }
+
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    United Software Solutions
+  </header>
+
+  <div class="weather-container">
+    <h1>Local Weather</h1>
+    <button onclick="getLocationWeather()">Get My Weather</button>
+    <div id="weatherResult"></div>
+  </div>
+
+  <script>
+    async function getLocationWeather() {
+      const apiKey = 'ec1bc01a115d4d699a6105622251704'; // Replace with your actual WeatherAPI key
+
+      const resultDiv = document.getElementById('weatherResult');
+      resultDiv.innerHTML = "Fetching location...";
+
+      if (!navigator.geolocation) {
+        resultDiv.innerHTML = "<p class='error'>Geolocation is not supported by your browser.</p>";
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${lat},${lon}`;
+
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error('Failed to fetch weather data');
+          const data = await response.json();
+
+          const weatherHTML = `
+            <h2>${data.location.name}, ${data.location.country}</h2>
+            <img class="weather-icon" src="https:${data.current.condition.icon}" alt="Weather icon" />
+            <div class="weather-info">
+              <p><strong>Temperature:</strong> ${data.current.temp_c}°C</p>
+              <p><strong>Feels Like:</strong> ${data.current.feelslike_c}°C</p>
+              <p><strong>Condition:</strong> ${data.current.condition.text}</p>
+              <p><strong>Humidity:</strong> ${data.current.humidity}%</p>
+              <p><strong>Wind:</strong> ${data.current.wind_kph} kph</p>
+            </div>
+          `;
+          resultDiv.innerHTML = weatherHTML;
+        } catch (error) {
+          resultDiv.innerHTML = `<p class='error'>${error.message}</p>`;
+        }
+      }, (error) => {
+        resultDiv.innerHTML = `<p class='error'>Geolocation Error: ${error.message}</p>`;
+      });
+    }
+  </script>
+
+</body>
+</html>
