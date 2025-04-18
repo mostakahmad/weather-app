@@ -98,7 +98,7 @@
 
   <script>
     async function getWeatherData() {
-      const apiKey = 'ec1bc01a115d4d699a6105622251704'; // Replace with your actual WeatherAPI key
+      const apiKey = 'YOUR_API_KEY'; // Replace with your actual WeatherAPI key
       const resultDiv = document.getElementById('result');
       resultDiv.innerHTML = 'Getting your location...';
 
@@ -116,7 +116,7 @@
     }
 
     async function getByIP() {
-      const apiKey = 'YOUR_API_KEY';
+      const apiKey = 'ec1bc01a115d4d699a6105622251704';
       const ipData = await fetchJson(`https://api.weatherapi.com/v1/ip.json?key=${apiKey}&q=auto:ip`);
       const city = ipData.city || ipData.region || ipData.country;
       fetchAll(city);
@@ -165,4 +165,40 @@
           <div class="section">
             <h2>📜 History (7 Days Ago)</h2>
             ${history.forecast.forecastday.map(day => `
-              <p><strong>${day.date}</strong>: ${day
+              <p><strong>${day.date}</strong>: ${day.day.avgtemp_c} °C, ${day.day.condition.text}</p>
+            `).join('')}
+          </div>
+
+          <div class="section">
+            <h2>🌅 Astronomy</h2>
+            <p><strong>Sunrise:</strong> ${astro.astronomy.astro.sunrise}</p>
+            <p><strong>Sunset:</strong> ${astro.astronomy.astro.sunset}</p>
+            <p><strong>Moon Phase:</strong> ${astro.astronomy.astro.moon_phase}</p>
+          </div>
+
+          <div class="section">
+            <h2>🕒 Timezone</h2>
+            <p><strong>Region:</strong> ${timezone.location.region || current.location.region || 'Not available'}</p>
+            <p><strong>Timezone ID:</strong> ${timezone.location.tz_id}</p>
+            <p><strong>Local Time:</strong> ${timezone.location.localtime}</p>
+          </div>
+        `;
+      } catch (err) {
+        resultDiv.innerHTML = `<p class="error">${err.message}</p>`;
+      }
+    }
+
+    async function fetchJson(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to fetch: " + url);
+      return res.json();
+    }
+
+    function getPastDate(daysAgo) {
+      const date = new Date();
+      date.setDate(date.getDate() - daysAgo);
+      return date.toISOString().split('T')[0];
+    }
+  </script>
+</body>
+</html>
