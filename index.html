@@ -1,173 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>United Software Solutions - Weather Dashboard</title>
+  <meta charset="UTF-8">
+  <title>United Software Solutions - Weather</title>
   <style>
-    :root {
-      --primary: #007acc;
-      --background: #f4f7f9;
-      --card-bg: #ffffff;
-      --text-dark: #333;
-      --text-light: #666;
-      --radius: 10px;
-      --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-      background-color: var(--background);
-      color: var(--text-dark);
-    }
-
-    header {
-      background-color: var(--primary);
-      color: white;
-      padding: 1.5rem;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #3a7bd5, #00d2ff);
+      color: #fff;
+      padding: 20px;
       text-align: center;
-      font-size: 1.8rem;
-      font-weight: bold;
-      box-shadow: var(--shadow);
     }
-
-    .container {
-      max-width: 900px;
-      margin: 2rem auto;
-      padding: 2rem;
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-
     h1 {
-      text-align: center;
-      margin-bottom: 1.5rem;
+      font-size: 2.5em;
+      margin-bottom: 10px;
     }
-
     button {
-      display: block;
-      margin: 0 auto 2rem;
-      background-color: var(--primary);
-      color: white;
+      padding: 10px 20px;
+      font-size: 1em;
+      background-color: #fff;
+      color: #3a7bd5;
       border: none;
-      padding: 0.75rem 2rem;
-      font-size: 1rem;
-      border-radius: var(--radius);
+      border-radius: 5px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      margin-bottom: 20px;
     }
-
-    button:hover {
-      background-color: #005f99;
+    .card {
+      background-color: rgba(255, 255, 255, 0.15);
+      padding: 20px;
+      margin: 10px auto;
+      border-radius: 10px;
+      max-width: 600px;
+      text-align: left;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     }
-
-    .section {
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid #ddd;
+    .card h2 {
+      margin-top: 0;
     }
-
-    .section h2 {
-      margin-bottom: 0.75rem;
-      color: var(--primary);
-    }
-
     p {
-      margin: 0.4rem 0;
-      color: var(--text-light);
-    }
-
-    .error {
-      color: red;
-      text-align: center;
+      margin: 5px 0;
     }
   </style>
 </head>
 <body>
-  <header>United Software Solutions</header>
-  <div class="container">
-    <h1>Weather Dashboard</h1>
-    <button onclick="getWeatherData()">Get My Weather Info</button>
-    <div id="result"></div>
-  </div>
+  <h1>United Software Solutions</h1>
+  <h2>Local Weather App</h2>
+  <button onclick="getAllWeatherInfo()">Get My Weather</button>
+  <div id="weatherResult"></div>
 
   <script>
-    async function getWeatherData() {
+    async function getAllWeatherInfo() {
       const apiKey = 'ec1bc01a115d4d699a6105622251704'; // Replace with your actual WeatherAPI key
-      const resultDiv = document.getElementById('result');
-      resultDiv.innerHTML = 'Getting your location...';
 
       if (!navigator.geolocation) {
-        resultDiv.innerHTML = "<p class='error'>Geolocation not supported.</p>";
+        document.getElementById('weatherResult').innerHTML = "Geolocation is not supported by your browser.";
         return;
       }
 
       navigator.geolocation.getCurrentPosition(async (position) => {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
+        const query = `${lat},${lon}`;
 
         try {
-          const [current, forecast, astro, timezone] = await Promise.all([
-            fetchJson(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${lat},${lon}`),
-            fetchJson(`https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${lat},${lon}&days=3`),
-            fetchJson(`https://api.weatherapi.com/v1/astronomy.json?key=${apiKey}&q=${lat},${lon}`),
-            fetchJson(`https://api.weatherapi.com/v1/timezone.json?key=${apiKey}&q=${lat},${lon}`)
+          const [currentRes, forecastRes, astroRes, timezoneRes, sportsRes] = await Promise.all([
+            fetch(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${query}`),
+            fetch(`https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${query}&days=3`),
+            fetch(`https://api.weatherapi.com/v1/astronomy.json?key=${apiKey}&q=${query}`),
+            fetch(`https://api.weatherapi.com/v1/timezone.json?key=${apiKey}&q=${query}`),
+            fetch(`https://api.weatherapi.com/v1/sports.json?key=${apiKey}&q=${query}`)
           ]);
 
-          resultDiv.innerHTML = `
-            <div class="section">
-              <h2>📍 Location</h2>
-              <p><strong>Place:</strong> ${current.location.name}, ${current.location.country}</p>
-              <p><strong>Coordinates:</strong> ${lat}, ${lon}</p>
-            </div>
+          const [current, forecast, astronomy, timezone, sports] = await Promise.all([
+            currentRes.json(), forecastRes.json(), astroRes.json(), timezoneRes.json(), sportsRes.json()
+          ]);
 
-            <div class="section">
-              <h2>🌤️ Current Weather</h2>
-              <p><strong>Temperature:</strong> ${current.current.temp_c} °C</p>
-              <p><strong>Feels Like:</strong> ${current.current.feelslike_c} °C</p>
+          document.getElementById('weatherResult').innerHTML = `
+            <div class="card">
+              <h2>Current Weather - ${current.location.name}, ${current.location.country}</h2>
+              <p><strong>Temperature:</strong> ${current.current.temp_c}°C</p>
               <p><strong>Condition:</strong> ${current.current.condition.text}</p>
               <p><strong>Humidity:</strong> ${current.current.humidity}%</p>
               <p><strong>Wind:</strong> ${current.current.wind_kph} kph</p>
             </div>
 
-            <div class="section">
-              <h2>📅 Forecast (Next 3 Days)</h2>
+            <div class="card">
+              <h2>3-Day Forecast</h2>
               ${forecast.forecast.forecastday.map(day => `
-                <p><strong>${day.date}</strong>: ${day.day.avgtemp_c} °C, ${day.day.condition.text}</p>
+                <p><strong>${day.date}:</strong> ${day.day.avgtemp_c}°C, ${day.day.condition.text}</p>
               `).join('')}
             </div>
 
-            <div class="section">
-              <h2>🌅 Astronomy</h2>
-              <p><strong>Sunrise:</strong> ${astro.astronomy.astro.sunrise}</p>
-              <p><strong>Sunset:</strong> ${astro.astronomy.astro.sunset}</p>
-              <p><strong>Moon Phase:</strong> ${astro.astronomy.astro.moon_phase}</p>
+            <div class="card">
+              <h2>Astronomy Info</h2>
+              <p><strong>Sunrise:</strong> ${astronomy.astronomy.astro.sunrise}</p>
+              <p><strong>Sunset:</strong> ${astronomy.astronomy.astro.sunset}</p>
+              <p><strong>Moon Phase:</strong> ${astronomy.astronomy.astro.moon_phase}</p>
             </div>
 
-            <div class="section">
-              <h2>🕒 Timezone</h2>
-              <p><strong>Region:</strong> ${timezone.location.region || 'Not available'}</p>
-              <p><strong>Timezone ID:</strong> ${timezone.location.tz_id}</p>
+            <div class="card">
+              <h2>Timezone Info</h2>
               <p><strong>Local Time:</strong> ${timezone.location.localtime}</p>
+              <p><strong>Timezone:</strong> ${timezone.location.tz_id}</p>
+              <p><strong>Region:</strong> ${timezone.location.region || timezone.location.name}</p>
+            </div>
+
+            <div class="card">
+              <h2>Sports Weather</h2>
+              ${Object.keys(sports).length > 0 ? sports.football.map(match => `
+                <p><strong>${match.stadium}:</strong> ${match.temp_c}°C, ${match.condition.text}</p>
+              `).join('') : '<p>No sports data available for your region.</p>'}
             </div>
           `;
-        } catch (err) {
-          resultDiv.innerHTML = `<p class="error">${err.message}</p>`;
-        }
-      }, (err) => {
-        resultDiv.innerHTML = `<p class="error">Geolocation Error: ${err.message}</p>`;
-      });
-    }
 
-    async function fetchJson(url) {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to fetch: " + url);
-      return res.json();
+        } catch (error) {
+          document.getElementById('weatherResult').innerHTML = `<p style="color:red;">${error.message}</p>`;
+        }
+      }, (error) => {
+        document.getElementById('weatherResult').innerHTML = `<p style="color:red;">Geolocation Error: ${error.message}</p>`;
+      });
     }
   </script>
 </body>
