@@ -4,57 +4,87 @@
   <meta charset="UTF-8" />
   <title>United Software Solutions - Weather Dashboard</title>
   <style>
+    :root {
+      --primary: #007acc;
+      --background: #f4f7f9;
+      --card-bg: #ffffff;
+      --text-dark: #333;
+      --text-light: #666;
+      --radius: 10px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: 'Segoe UI', Tahoma, sans-serif;
-      background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
-      color: #333;
+      background-color: var(--background);
+      color: var(--text-dark);
     }
 
     header {
-      background-color: #2c3e50;
-      padding: 1rem 2rem;
+      background-color: var(--primary);
+      color: white;
+      padding: 1.5rem;
       text-align: center;
-      color: #fff;
-      font-size: 1.5rem;
+      font-size: 1.8rem;
+      font-weight: bold;
+      box-shadow: var(--shadow);
     }
 
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 2rem auto;
-      background: #fff;
-      border-radius: 15px;
       padding: 2rem;
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
     }
 
-    h2 {
-      color: #2c3e50;
-      margin-top: 2rem;
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
     }
 
     button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      background-color: #3498db;
+      display: block;
+      margin: 0 auto 2rem;
+      background-color: var(--primary);
       color: white;
-      font-size: 16px;
+      border: none;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      border-radius: var(--radius);
       cursor: pointer;
+      transition: background 0.3s ease;
     }
 
     button:hover {
-      background-color: #2980b9;
+      background-color: #005f99;
+    }
+
+    .section {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .section h2 {
+      margin-bottom: 0.75rem;
+      color: var(--primary);
+    }
+
+    p {
+      margin: 0.4rem 0;
+      color: var(--text-light);
     }
 
     .error {
       color: red;
-    }
-
-    .section {
-      margin-top: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid #ddd;
+      text-align: center;
     }
   </style>
 </head>
@@ -68,7 +98,7 @@
 
   <script>
     async function getWeatherData() {
-      const apiKey = 'ec1bc01a115d4d699a6105622251704'; // Replace with your actual key
+      const apiKey = 'ec1bc01a115d4d699a6105622251704'; // Replace with your actual WeatherAPI key
       const resultDiv = document.getElementById('result');
       resultDiv.innerHTML = 'Getting your location...';
 
@@ -91,35 +121,37 @@
 
           resultDiv.innerHTML = `
             <div class="section">
-              <h2>Location</h2>
-              <p><strong>Name:</strong> ${current.location.name}, ${current.location.country}</p>
-              <p><strong>Lat/Lon:</strong> ${lat}, ${lon}</p>
+              <h2>📍 Location</h2>
+              <p><strong>Place:</strong> ${current.location.name}, ${current.location.country}</p>
+              <p><strong>Coordinates:</strong> ${lat}, ${lon}</p>
             </div>
 
             <div class="section">
-              <h2>Current Weather</h2>
+              <h2>🌤️ Current Weather</h2>
               <p><strong>Temperature:</strong> ${current.current.temp_c} °C</p>
               <p><strong>Feels Like:</strong> ${current.current.feelslike_c} °C</p>
               <p><strong>Condition:</strong> ${current.current.condition.text}</p>
+              <p><strong>Humidity:</strong> ${current.current.humidity}%</p>
+              <p><strong>Wind:</strong> ${current.current.wind_kph} kph</p>
             </div>
 
             <div class="section">
-              <h2>Forecast (Next 3 Days)</h2>
+              <h2>📅 Forecast (Next 3 Days)</h2>
               ${forecast.forecast.forecastday.map(day => `
                 <p><strong>${day.date}</strong>: ${day.day.avgtemp_c} °C, ${day.day.condition.text}</p>
               `).join('')}
             </div>
 
             <div class="section">
-              <h2>Astronomy</h2>
+              <h2>🌅 Astronomy</h2>
               <p><strong>Sunrise:</strong> ${astro.astronomy.astro.sunrise}</p>
               <p><strong>Sunset:</strong> ${astro.astronomy.astro.sunset}</p>
               <p><strong>Moon Phase:</strong> ${astro.astronomy.astro.moon_phase}</p>
             </div>
 
             <div class="section">
-              <h2>Timezone</h2>
-              <p><strong>Region:</strong> ${timezone.location.region}</p>
+              <h2>🕒 Timezone</h2>
+              <p><strong>Region:</strong> ${timezone.location.region || 'Not available'}</p>
               <p><strong>Timezone ID:</strong> ${timezone.location.tz_id}</p>
               <p><strong>Local Time:</strong> ${timezone.location.localtime}</p>
             </div>
